@@ -61,6 +61,16 @@ exports['default'] = function (React, TestUtils) {
     };
   };
 
+  var findLatestElementsInLog = function findLatestElementsInLog(log) {
+    var elements = null;
+    log.forEach(function (entry) {
+      if (entry.type === 'RELEVANT_ELEMENTS') {
+        elements = entry.payload;
+      }
+    });
+    return elements;
+  };
+
   var createEvent = {
     updateProps: function updateProps(props) {
       return function (render) {
@@ -69,12 +79,7 @@ exports['default'] = function (React, TestUtils) {
     },
     withElements: function withElements(fn) {
       return function (_, log) {
-        var elements = null;
-        log.forEach(function (entry) {
-          if (entry.type === 'RELEVANT_ELEMENTS') {
-            elements = entry.payload;
-          }
-        });
+        var elements = findLatestElementsInLog(log);
         if (elements === null) {
           throw new Error('event withElements() can\'t be before at least one updateProps()');
         }
@@ -83,7 +88,7 @@ exports['default'] = function (React, TestUtils) {
     }
   };
 
-  return { render: render, traverse: traverse, findRelevant: findRelevant, renderToRelevant: renderToRelevant, run: run, createEvent: createEvent };
+  return { render: render, traverse: traverse, findRelevant: findRelevant, renderToRelevant: renderToRelevant, run: run, createEvent: createEvent, findLatestElementsInLog: findLatestElementsInLog };
 };
 
 module.exports = exports['default'];
