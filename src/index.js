@@ -45,15 +45,20 @@ export default function(React, TestUtils) {
     return log
   }
 
+  const findLatestElementsInLog = log => {
+    let elements = null
+    log.forEach(entry => {
+      if (entry.type === 'RELEVANT_ELEMENTS') {
+        elements = entry.payload
+      }
+    })
+    return elements
+  }
+
   const createEvent = {
     updateProps: props => render => render(props),
     withElements: fn => (_, log) => {
-      let elements = null
-      log.forEach(entry => {
-        if (entry.type === 'RELEVANT_ELEMENTS') {
-          elements = entry.payload
-        }
-      })
+      const elements = findLatestElementsInLog(log)
       if (elements === null) {
         throw new Error('event withElements() can\'t be before at least one updateProps()')
       }
@@ -61,5 +66,5 @@ export default function(React, TestUtils) {
     },
   }
 
-  return {render, traverse, findRelevant, renderToRelevant, run, createEvent}
+  return {render, traverse, findRelevant, renderToRelevant, run, createEvent, findLatestElementsInLog}
 }
