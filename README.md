@@ -2,7 +2,7 @@
 
 Experimental utilities for joyful React testing based on shallow rendering.
 
-See (example/entry.js)[https://github.com/rpominov/react-joyful-testing/blob/master/example/entry.js] for a working example.
+See [example/entry.js](https://github.com/rpominov/react-joyful-testing/blob/master/example/entry.js) for a working example.
 
 
 ## Itentions
