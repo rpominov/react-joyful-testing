@@ -9,7 +9,7 @@ See [example/entry.js](https://github.com/rpominov/react-joyful-testing/blob/mas
 
 ### 1. Make it easy to decouple unrelated UI design stuff from what we want to test.
 
-Mark related for the test parts with special `_tId` or `_tClass` props, and the you are free to change unrelated parts of markup and tests will still pass.
+Mark parts related for the test with special `_tId` or `_tClass` props, and then you are free to change unrelated parts of markup and tests will still pass.
 
 For example first version of a component output could look like this:
 
@@ -21,7 +21,7 @@ For example first version of a component output could look like this:
 </div>
 ```
 
-Then we add title, change the tag from `span` to `p`, but all this unrelated to what we want to test so tests should still pass:
+Then we add title, change the tag from `span` to `p`, but all this unrelated changes won't affect tests:
 
 ```js
 <div>
@@ -32,9 +32,9 @@ Then we add title, change the tag from `span` to `p`, but all this unrelated to 
 </div>
 ```
 
-### 2. Reduce stateless component testing to testing of pure functions `inputProps -> relevantElements`.
+### 2. Reduce stateless components testing to testing of pure functions `inputProps -> relevantElements`.
 
-Stateless components already simple to test, but there are still some boilerplate we might want to get rid of.
+Stateless components are already simple to test, but there are still some boilerplate we might want to get rid of.
 
 With `react-joyful-testing` instead of this:
 
@@ -57,7 +57,7 @@ expect(renderComp({value: 1, max: 10}).value.props.children).toEqual(1)
 expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 ```
 
-### 3. Reduce statefull compoents testing to testing of fucntions `[Event] -> [Tree | OtherEvent]`
+### 3. Reduce statefull compoents testing to testing of fucntions `[Event] -> [Tree | OtherLogItem]`
 
 TODO: write a better explanation
 
