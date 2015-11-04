@@ -37,6 +37,7 @@ Stateless components already simple to test, but there are still some boilerplat
 With `react-joyful-testing` instead of this:
 
 ```js
+// We have to repeat this code over and over
 const renderer = TestUtils.createRenderer()
 renderer.render(<Comp value={1} max={10} />)
 const output = renderer.getRenderOutput()
