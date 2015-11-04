@@ -57,7 +57,7 @@ expect(renderComp({value: 1, max: 10}).value.props.children).toEqual(1)
 expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 ```
 
-### 3. Reduce statefull compoents testing to testing of fucntions `[Event] -> [Tree | OtherLogItem]`
+### 3. Reduce stateful compoents testing to testing of fucntions pure<sup>?</sup> `[Event] -> [Tree | OtherLogItem]`
 
 TODO: write a better explanation
 
