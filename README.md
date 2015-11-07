@@ -59,7 +59,7 @@ expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 
 ### 3. Reduce stateful components testing to testing of pure* fucntions `events -> log`
 
-__*__ It accept bunch of not pure imperative functions as argumnets and call them internaly.
+__*__ It accepts bunch of not pure imperative functions as argumnets and call them internaly.
 So strictly speaking `eventsToLog()` isn't pure, but it still shoud preserve referential transperency
 — always return the same log for the same collection of events.
 You should be careful though, and don't leak the state from impure functions that you're passing (it isn't hard).
