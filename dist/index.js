@@ -1,10 +1,8 @@
 'use strict';
 
-exports.__esModule = true;
-
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-exports['default'] = function (React, TestUtils) {
+module.exports = function (React, TestUtils) {
 
   var render = function render(Comp) {
     return function (props) {
@@ -43,52 +41,82 @@ exports['default'] = function (React, TestUtils) {
     };
   };
 
-  var run = function run(Comp) {
-    return function (fn) {
-      var log = [];
-      var renderer = TestUtils.createRenderer();
-      var addToLog = function addToLog(entry) {
-        log = log.concat([entry]);
-      };
-      var render = function render(props) {
-        renderer.render(React.createElement(Comp, props));
-      };
-      fn(addToLog).forEach(function (event) {
-        event(render, log);
-        addToLog({ type: 'RELEVANT_ELEMENTS', payload: findRelevant(renderer.getRenderOutput()) });
+  var mapOverRenders = function mapOverRenders(fn) {
+    return function (log) {
+      return log.filter(function (x) {
+        return x && x.type === 'RENDER';
+      }).map(function (x) {
+        return fn(x.payload);
       });
-      return log;
     };
   };
 
-  var findLatestElementsInLog = function findLatestElementsInLog(log) {
-    var elements = null;
-    log.forEach(function (entry) {
-      if (entry.type === 'RELEVANT_ELEMENTS') {
-        elements = entry.payload;
-      }
-    });
-    return elements;
+  var lastRendered = function lastRendered(log) {
+    var xs = mapOverRenders(function (x) {
+      return x;
+    })(log);
+    return xs.length > 0 ? xs[xs.length - 1] : null;
   };
 
-  var createEvent = {
-    updateProps: function updateProps(props) {
-      return function (render) {
-        return render(props);
+  var eventCreators = {
+    triggerCallback: function triggerCallback(elementName, callbackName) {
+      var args = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+      var context = arguments.length <= 3 || arguments[3] === undefined ? null : arguments[3];
+
+      return function (_ref) {
+        var log = _ref.log;
+
+        lastRendered(log)[elementName].props[callbackName].apply(context, args);
       };
     },
-    withElements: function withElements(fn) {
-      return function (_, log) {
-        var elements = findLatestElementsInLog(log);
-        if (elements === null) {
-          throw new Error('event withElements() can\'t be before at least one updateProps()');
-        }
-        fn(elements);
+    setProps: function setProps(props) {
+      return function (_ref2) {
+        var setProps = _ref2.setProps;
+
+        setProps(props);
       };
     }
   };
 
-  return { render: render, traverse: traverse, findRelevant: findRelevant, renderToRelevant: renderToRelevant, run: run, createEvent: createEvent, findLatestElementsInLog: findLatestElementsInLog };
-};
+  var eventsToLog = function eventsToLog(Comp) {
+    return function (events) {
+      var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-module.exports = exports['default'];
+      var _ref3$before = _ref3.before;
+      var before = _ref3$before === undefined ? function () {} : _ref3$before;
+      var _ref3$after = _ref3.after;
+      var after = _ref3$after === undefined ? function () {} : _ref3$after;
+
+      var log = [];
+      var context = {};
+      var renderer = TestUtils.createRenderer();
+      var addToLog = function addToLog(entry) {
+        log = log.concat([entry]);
+      };
+      var setProps = function setProps(props) {
+        renderer.render(React.createElement(Comp, props));
+      };
+      before(context);
+      events.forEach(function (event) {
+        event({ context: context, setProps: setProps, addToLog: addToLog, log: log });
+        addToLog({
+          type: 'RENDER',
+          payload: findRelevant(renderer.getRenderOutput())
+        });
+      });
+      after(context);
+      return log;
+    };
+  };
+
+  return {
+    render: render,
+    traverse: traverse,
+    findRelevant: findRelevant,
+    renderToRelevant: renderToRelevant,
+    eventsToLog: eventsToLog,
+    lastRendered: lastRendered,
+    mapOverRenders: mapOverRenders,
+    eventCreators: eventCreators
+  };
+};
