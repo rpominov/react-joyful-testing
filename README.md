@@ -5,7 +5,8 @@ Experimental utilities for joyful React testing based on shallow rendering.
 Until we have proper docs please see [example/entry.js](https://github.com/rpominov/react-joyful-testing/blob/master/example/entry.js) for working examples, and [src/index.js](https://github.com/rpominov/react-joyful-testing/blob/master/src/index.js) for all available API.
 
 
-## Itentions
+## Intentions
+
 
 ### 1. Make it easy to decouple unrelated UI design stuff from what we want to test.
 
@@ -48,9 +49,11 @@ findRelevant(
 // }
 ```
 
-### 2. Reduce stateless components testing to testing of pure functions `inputProps -> relevantElements`.
 
-Stateless components are already simple to test, but there are still some boilerplate we might want to get rid of.
+### 2. Reduce stateless components testing to testing of pure functions `props -> relevantElements`.
+
+Stateless components are already simple to test,
+but there are still some boilerplate we might want to get rid of.
 
 With `react-joyful-testing` instead of this:
 
@@ -72,6 +75,7 @@ const renderComp = renderToRelevant(Comp)
 expect(renderComp({value: 1, max: 10}).value.props.children).toEqual(1)
 expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 ```
+
 
 ### 3. Reduce stateful components testing to testing of pure* fucntions `events -> log`
 
