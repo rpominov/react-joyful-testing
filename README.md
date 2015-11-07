@@ -44,7 +44,7 @@ const renderer = TestUtils.createRenderer()
 renderer.render(<Comp value={1} max={10} />)
 const output = renderer.getRenderOutput()
 
-// Here you're supposed to make assertions against `output` 
+// Here you're supposed to make assertions against `output`
 // which is a React-element tree that your component render function returns.
 // Basically you're on your own with that tree data structure...
 ```
@@ -57,21 +57,31 @@ expect(renderComp({value: 1, max: 10}).value.props.children).toEqual(1)
 expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 ```
 
-### 3. Reduce stateful compoents testing to testing of pure<sup>?</sup> fucntions `[Event] -> [Tree | OtherLogItem]`
+### 3. Reduce stateful compoents testing to testing of pure<sup>?</sup> fucntions `[Event] -> [Renders | OtherLogItem]`
 
 TODO: write a better explanation
 
 Here is how it looks like:
 
 ```js
-const runComp = run(Comp)
+import React from 'react'
+import TestUtils from 'react-addons-test-utils'
+import createJoy from 'react-joyful-testing'
 
-const clickInc = createEvent.withElements(els => {els.incBtn.props.onClick()})
-const clickDec = createEvent.withElements(els => {els.decBtn.props.onClick()})
-const setMax = max => createEvent.updateProps({initialValue: 0, max})
+const {
+  eventsToLog,
+  mapOverRenders,
+  eventCreators: {triggerCallback, setProps},
+} = createJoy(React, TestUtils)
 
-// TODO: make an example where `addToLog` actually used
-const log = runComp(addToLog => [setMax(10), clickInc, clickInc, clickInc, setMax(2), setMax(10), clickDec])
+import MyStateful from './targets/Stateful'
 
-expect(log.map(entry => entry.payload.value.props.children)).toEqual([0, 1, 2, 3, "2+", 3, 2])
+const clickInc = triggerCallback('incBtn', 'onClick')
+const clickDec = triggerCallback('decBtn', 'onClick')
+const setMax = max => setProps({initialValue: 0, max})
+
+const events = [setMax(10), clickInc, clickInc, clickInc, setMax(2), setMax(10), clickDec]
+
+const log = eventsToLog(MyStateful)(events)
+console.log(mapOverRenders(els => els.value.props.children)(log)) // [0, 1, 2, 3, "2+", 3, 2]
 ```

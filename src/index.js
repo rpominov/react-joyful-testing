@@ -1,4 +1,4 @@
-export default function(React, TestUtils) {
+module.exports = function(React, TestUtils) {
 
   const render = Comp => props => {
     const renderer = TestUtils.createRenderer()
@@ -29,42 +29,54 @@ export default function(React, TestUtils) {
 
   const renderToRelevant = Comp => props => findRelevant(render(Comp)(props))
 
-  const run = Comp => fn => {
+  const mapOverRenders = fn => log => {
+    return log.filter(x => x && x.type === 'RENDER').map(x => fn(x.payload))
+  }
+
+  const lastRendered = log => {
+    const xs = mapOverRenders(x => x)(log)
+    return xs.length > 0 ? xs[xs.length - 1] : null
+  }
+
+  const eventCreators = {
+    triggerCallback(elementName, callbackName, args = [], context = null) {
+      return ({log}) => {
+        lastRendered(log)[elementName].props[callbackName].apply(context, args)
+      }
+    },
+    setProps(props) {
+      return ({setProps}) => {
+        setProps(props)
+      }
+    }
+  }
+
+  const eventsToLog = Comp => (events, {before = () => {}, after = () => {}} = {}) => {
     let log = []
+    const context = {}
     const renderer = TestUtils.createRenderer()
-    const addToLog = entry => {
-      log = log.concat([entry])
-    }
-    const render = props => {
-      renderer.render(<Comp {...props} />)
-    }
-    fn(addToLog).forEach(event => {
-      event(render, log)
-      addToLog({type: 'RELEVANT_ELEMENTS', payload: findRelevant(renderer.getRenderOutput())})
+    const addToLog = entry => {log = log.concat([entry])}
+    const setProps = props => {renderer.render(<Comp {...props} />)}
+    before(context)
+    events.forEach(event => {
+      event({context, setProps, addToLog, log})
+      addToLog({
+        type: 'RENDER',
+        payload: findRelevant(renderer.getRenderOutput())
+      })
     })
+    after(context)
     return log
   }
 
-  const findLatestElementsInLog = log => {
-    let elements = null
-    log.forEach(entry => {
-      if (entry.type === 'RELEVANT_ELEMENTS') {
-        elements = entry.payload
-      }
-    })
-    return elements
+  return {
+    render,
+    traverse,
+    findRelevant,
+    renderToRelevant,
+    eventsToLog,
+    lastRendered,
+    mapOverRenders,
+    eventCreators
   }
-
-  const createEvent = {
-    updateProps: props => render => render(props),
-    withElements: fn => (_, log) => {
-      const elements = findLatestElementsInLog(log)
-      if (elements === null) {
-        throw new Error('event withElements() can\'t be before at least one updateProps()')
-      }
-      fn(elements)
-    },
-  }
-
-  return {render, traverse, findRelevant, renderToRelevant, run, createEvent, findLatestElementsInLog}
 }
