@@ -2,7 +2,7 @@
 
 Experimental utilities for joyful React testing based on shallow rendering.
 
-See [example/entry.js](https://github.com/rpominov/react-joyful-testing/blob/master/example/entry.js) for a working example.
+Until we have proper docs please see [example/entry.js](https://github.com/rpominov/react-joyful-testing/blob/master/example/entry.js) for working examples, and [src/index.js](https://github.com/rpominov/react-joyful-testing/blob/master/src/index.js) for all available API.
 
 
 ## Itentions
@@ -30,6 +30,22 @@ Then we add title, change the tag from `span` to `p`, but all this unrelated cha
     {value > max ? `${max}+` : value}
   </p>
 </div>
+```
+
+The library provides `findRelevant()` method for finding marked elements:
+
+```js
+findRelevant(
+  <div>
+    <span _tId="foo">foo</span>
+    <span _tClass="bar">bar1</span>
+    <span _tClass="bar">bar2</span>
+  </div>
+)
+// {
+//   foo: <span _tId="foo">foo</span>,
+//   bar: [<span _tClass="bar">bar1</span>, <span _tClass="bar">bar2</span>]
+// }
 ```
 
 ### 2. Reduce stateless components testing to testing of pure functions `inputProps -> relevantElements`.
@@ -64,15 +80,25 @@ So strictly speaking `eventsToLog()` isn't pure, but it still shoud preserve ref
 — always return the same log for the same collection of events.
 You should be careful though, and don't leak the state from impure functions that you're passing (it isn't hard).
 
-_Events_ is functions `({context, setProps, addToLog, log}) -> void`, and the _log_
-consists of the renderend elements dumped after each _event_ plus any custom entries
-added using `addToLog()`. Also we have some helpers for creating _events_ — `eventCreators`.
+_Events_ is arbitrary events that happen with a running component instance,
+such as props updates, callback calls etc.
+
+The _log_ consists of the renderend elements dumped after each _event_
+plus any custom user entries.
+
+From technical persprctive _events_ are functions
+`({context, setProps, addToLog, log}) -> void`.
+And we have some helpers for creating such functions — _event creators_.
+Alhtough you can also use API directly or write your own event creators.
 
 The full signature of `eventsToLog` is:
 
 ```js
 eventsToLog(Comp)(ArrayOfEvents, {before: context -> void, after: context -> void}) -> log
 ```
+
+The `context` here is just a mutable object where you can stash whatever you need,
+for example some mock instances. It available in before/after hooks as well as in event-functions.
 
 And here is how it looks like as a whole:
 
