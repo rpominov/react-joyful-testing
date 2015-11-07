@@ -60,11 +60,12 @@ expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 ### 3. Reduce stateful compoents testing to testing of pure* fucntions `events -> log`
 
 __*__ It accept bunch of not pure imperative functions as argumnets and call them internaly.
-So strictly speaking `eventsToLog()` is't pure, but it still shoud preserve referential transperency.
+So strictly speaking `eventsToLog()` isn't pure, but it still shoud preserve referential transperency
+— always return the same log for the same collection of events.
 You should be careful though, and don't leak the state from impure functions that you're passing (it isn't hard).
 
-Events is functions `({context, setProps, addToLog, log}) -> void`, and the _log_
-contains the renderend elements dumped after each _event_ plus any custom entries
+_Events_ is functions `({context, setProps, addToLog, log}) -> void`, and the _log_
+consists of the renderend elements dumped after each _event_ plus any custom entries
 added using `addToLog()`. Also we have some helpers for creating _events_ — `eventCreators`.
 
 The full signature of `eventsToLog` is:
