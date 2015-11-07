@@ -57,9 +57,19 @@ expect(renderComp({value: 1, max: 10}).value.props.children).toEqual(1)
 expect(renderComp({value: 11, max: 10}).value.props.children).toEqual('10+')
 ```
 
-### 3. Reduce stateful compoents testing to testing of pure<sup>?</sup> fucntions `[Event] -> [Renders | OtherLogItem]`
+### 3. Reduce stateful compoents testing to testing of pure<sup>?</sup> fucntions `events -> log`
 
-TODO: write a better explanation
+Events is functions `({context, setProps, addToLog, log}) -> void`, and the _log_
+contains the renderend elements dumped after each _event_ plus any custom entries
+added using `addToLog()`.
+
+Also we have some helpers for creating _events_ — `eventCreators`.
+
+The full signature of `eventsToLog` is:
+
+```
+eventsToLog(Comp)(ArrayOfEvents, {before: context -> void, after: context -> void}) -> log
+```
 
 Here is how it looks like:
 
@@ -80,7 +90,15 @@ const clickInc = triggerCallback('incBtn', 'onClick')
 const clickDec = triggerCallback('decBtn', 'onClick')
 const setMax = max => setProps({initialValue: 0, max})
 
-const events = [setMax(10), clickInc, clickInc, clickInc, setMax(2), setMax(10), clickDec]
+const events = [
+  setMax(10),
+  clickInc,
+  clickInc,
+  clickInc,
+  setMax(2),
+  setMax(10),
+  clickDec,
+]
 
 const log = eventsToLog(MyStateful)(events)
 console.log(mapOverRenders(els => els.value.props.children)(log)) // [0, 1, 2, 3, "2+", 3, 2]
