@@ -10,6 +10,6 @@
     "babel-loader": "5.3.3",
     "react": "0.14.1",
     "react-addons-test-utils": "0.14.1",
-    "webpack": "1.12.2"
+    "webpack": "5.94.0"
   }
 }
